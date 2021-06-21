@@ -19,19 +19,6 @@ Pypot is also compatible with the [CoppeliaSim simulator](http://www.coppeliarob
 
 Finally, it has been developed to permit an easy and fast extension to other types of motors and sensors.
 
-## The Poppy-project: open source
-
-Pypot is part of the [Poppy project](http://www.poppy-project.org) aiming at developing robotic creations that are easy to build, customize, deploy, and share. It promotes open-source by sharing hardware, software, and web tools.
-
-At the moment we already proposed a few Poppy Creatures:
-
-* the [Poppy Humanoid](https://github.com/poppy-project/poppy-humanoid): a kid-size humanoid robot designed for biped locomotion and physical human-robot interaction,
-* a [Poppy Torso](https://github.com/poppy-project/poppy-torso): the humanoid torso, with a suction pad to install it on a desk
-* and a [Poppy Ergo Jr](https://github.com/poppy-project/poppy-ergo-jr) with low-cost XL-320 robotis motors and modular 3D printed parts.
-
-![Poppy Humanoid](./doc/poppy-creatures.jpg)
-
-All those creatures are based on a combination of standard dynamixel actuators, 3D printed parts and open-source electronics such as Arduino boards. Both the hardware (3D models, electronics...) and software can be freely used, modified and duplicated.
 
 ## Documentation
 
