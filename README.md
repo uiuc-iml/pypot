@@ -2,7 +2,8 @@
 [![Build Status](https://travis-ci.org/poppy-project/pypot.svg?branch=master)](https://travis-ci.org/poppy-project/pypot) 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.591809.svg)](https://doi.org/10.5281/zenodo.591809)
 
-This is a fork of Pypot that leverages their dynamixel api, expanding it to handle MX motors using the 2.0 protocol effectively.
+## note from forker:
+This is a fork of Pypot that leverages their dynamixel api, expanding it to handle MX motors using the 2.0 protocol effectively. Every other functionality has been stripped. 
 
 # Pypot: A Python lib for Dynamixel motors control
 
