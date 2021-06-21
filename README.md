@@ -3,7 +3,7 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.591809.svg)](https://doi.org/10.5281/zenodo.591809)
 
 ## note from forker:
-This is a fork of Pypot that leverages their dynamixel api, expanding it to handle MX motors using the 2.0 protocol effectively. Every other functionality has been stripped. 
+This is a fork of Pypot that leverages their dynamixel api, expanding it to handle MX motors using the 2.0 protocol. Every other functionality has been stripped. 
 
 # Pypot: A Python lib for Dynamixel motors control
 
