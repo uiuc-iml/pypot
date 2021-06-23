@@ -14,7 +14,7 @@
 
 import numpy
 import itertools
-
+import time
 from enum import Enum
 
 # MARK: - Position
@@ -81,43 +81,53 @@ def degree_to_dxl(value, model):
 
 
 def dxl_to_speed(value, model):
-    cw, speed = divmod(value, 1024)
-    direction = (-2 * cw + 1)
+    # cw, speed = divmod(value, 1024)
+    # direction = (-2 * cw + 1)
 
-    speed_factor = 0.111
-    if model.startswith('MX') or model.startswith('SR'):
-        speed_factor = 0.114
-
-    return direction * (speed * speed_factor) * 6
+    # speed_factor = 0.111
+    # if model.startswith('MX') or model.startswith('SR'):
+    #     speed_factor = 0.114
+    # print('this is the value I got {}'.format(value))
+    if(value > 4294967296/2):
+        velocity = (value - 4294967296)
+    else:
+        velocity = value
+    return velocity*0.229
 
 
 def speed_to_dxl(value, model):
-    direction = 1024 if value < 0 else 0
-    speed_factor = 0.111
-    if model.startswith('MX') or model.startswith('SR'):
-        speed_factor = 0.114
+    # direction = 1024 if value < 0 else 0
+    # speed_factor = 0.111
+    # if model.startswith('MX') or model.startswith('SR'):
+    #     speed_factor = 0.114
 
-    max_value = 1023 * speed_factor * 6
-    value = min(max(value, -max_value), max_value)
-
-    return int(round(direction + abs(value) / (6 * speed_factor), 0))
+    # max_value = 1023 * speed_factor * 6
+    # value = min(max(value, -max_value), max_value)
+    if(value < 0):
+        speed = value/0.229 - 4294967296
+    else:
+        speed = value/0.229
+    print('sending this speed:',speed)
+    return int(speed)
 
 # MARK: - Torque
 
 
 def dxl_to_torque(value, model):
-    return round(value / 10.23, 1)
+    return round(value / 10, 1)
 
 
 def torque_to_dxl(value, model):
-    return int(round(value * 10.23, 0))
+    return int(round(value * 10, 0))
 
 
 def dxl_to_load(value, model):
-    cw, load = divmod(value, 1024)
-    direction = -2 * cw + 1
-
-    return dxl_to_torque(load, model) * direction
+    print('processing this value {}'.format(value))
+    if(value > 1000):
+        load = value - 65536
+    else:
+        load = value
+    return dxl_to_torque(load, model)
 
 # MARK - Acceleration
 
@@ -156,6 +166,7 @@ dynamixelModels = {
     24: 'RX-24',    # 24 + (0<<8)
     28: 'RX-28',    # 28 + (0<<8)
     29: 'MX-28',    # 29 + (0<<8)
+    30: 'MX-28',    # 30 + (0<<8)
     64: 'RX-64',    # 64 + (0<<8)
     360: 'MX-12',   # 104 + (1<<8)
     310: 'MX-64',   # 54 + (1<<8)
@@ -183,15 +194,18 @@ def dxl_to_drive_mode(value, model):
 def drive_mode_to_dxl(value, model):
     return (int('slave' in value) << 1 | int('reverse' in value))
 
+def dxl_to_load_velocity_position(value,model):
+    load = dxl_to_load(value%65536,model)
+    velocity = dxl_to_speed(((value>>16)%4294967296),model)
+    position = dxl_to_degree(((value>>48)%4294967296),model)
+    return(load,velocity,position)
 # MARK: - Baudrate
 
 
 dynamixelBaudrates = {
     1: 1000000.0,
     3: 500000.0,
-    4: 400000.0,
-    7: 250000.0,
-    9: 200000.0,
+    4: 400000.0,-
     16: 117647.1,
     34: 57600.0,
     103: 19230.8,
@@ -325,8 +339,9 @@ def led_color_to_dxl(value, model):
 
 
 control_modes = {
-    1: 'wheel',
-    2: 'joint',
+    1: 'velocity',
+    3: 'position',
+    4: 'extended_position'
 }
 
 
@@ -335,6 +350,7 @@ def dxl_to_control_mode(value, _):
 
 
 def control_mode_to_dxl(mode, _):
+    print('converting mode')
     return (next((v for v, m in control_modes.items()
                   if m == mode), None))
 
@@ -350,15 +366,23 @@ def bool_to_dxl(value, model):
 
 
 def dxl_decode(data):
-    if len(data) not in (1, 2):
+    if len(data) == 0:
         raise ValueError('try to decode incorrect data {}'.format(data))
+    
+    # if len(data) == 1:
+    #     return data[0]
 
-    if len(data) == 1:
-        return data[0]
-
-    if len(data) == 2:
-        return data[0] + (data[1] << 8)
-
+    # if len(data) == 2:
+    #     return data[0] + (data[1] << 8)
+    
+    # if len(data) == 4:
+    #     return data[0] + (data[1]<<8) + (data[])
+    output = 0
+    # print('\n\nthis is data {}\n\n'.format(data))
+    for i in range(len(data)):
+        output += (data[i] << (8*i))
+        # print('this is output now',output)
+    return output
 
 def dxl_decode_all(data, nb_elem):
     if nb_elem > 1:
@@ -369,15 +393,21 @@ def dxl_decode_all(data, nb_elem):
 
 
 def dxl_code(value, length):
-    if length not in (1, 2):
+    start_time = time.time()
+    if length <= 0:
         raise ValueError('try to code value with an incorrect length {}'.format(length))
 
-    if length == 1:
-        return (value, )
+    # if length == 1:
+    #     return (value, )
 
-    if length == 2:
-        return (value % 256, value >> 8)
-
+    # if length == 2:
+    #     return (value % 256, value >> 8)
+    result = length*[0]
+    # print(value)
+    for i in range(length):
+        result[i]  = ((value >> (8*i))%256)
+    # print('decoding took {}'.format(time.time()-start_time))
+    return tuple(result)
 
 def dxl_code_all(value, length, nb_elem):
     if nb_elem > 1:

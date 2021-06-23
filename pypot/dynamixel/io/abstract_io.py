@@ -5,7 +5,6 @@ import logging
 import operator
 import itertools
 import threading
-
 from collections import namedtuple, OrderedDict
 from contextlib import contextmanager
 
@@ -506,7 +505,9 @@ class AbstractDxlIO(object):
             return status_packet
 
     def __real_read(self, instruction_packet, _force_lock):
+
         with self.__force_lock(_force_lock) or self._serial_lock:
+            # print('length of the packet = {}'.format(self._protocol.DxlPacketHeader.length))
             data = self._serial.read(self._protocol.DxlPacketHeader.length)
             if not data:
                 raise DxlTimeoutError(self, instruction_packet, instruction_packet.id)
