@@ -122,7 +122,7 @@ def torque_to_dxl(value, model):
 
 
 def dxl_to_load(value, model):
-    print('processing this value {}'.format(value))
+    # print('processing this value {}'.format(value))
     if(value > 1000):
         load = value - 65536
     else:
