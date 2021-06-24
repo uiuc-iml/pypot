@@ -67,7 +67,7 @@ def dxl_to_degree(value, model):
 def degree_to_dxl(value, model):
     determined_model = '*'
     if model.startswith('MX'):
-        determined_model = 'MX'
+        determined_model = 'MX'   
     elif model.startswith('SR'):
         determined_model = 'SR'
     max_pos, max_deg = position_range[determined_model]
@@ -76,6 +76,25 @@ def degree_to_dxl(value, model):
     pos = min(max(pos, 0), max_pos - 1)
 
     return pos
+
+def dxl_to_multi_degree(value,model):
+    print('receiving this pos value = {}'.format(value))
+
+    if(value > 4294967296/2):
+        value = (value - 4294967296)
+    else:
+        value = value
+    return 0.088*value
+
+def multi_degree_to_dxl(value,model):
+
+    if(value < 0):
+        pos = 4294967296 + value/0.088
+    else:
+        pos = value/0.088
+    print('sending this pos: {} , which is read as {}'.format(pos,dxl_to_multi_degree(pos,None)))
+
+    return int(numpy.round((numpy.clip(pos,0,4294967296))))
 
 # MARK: - Speed
 
@@ -104,11 +123,11 @@ def speed_to_dxl(value, model):
     # max_value = 1023 * speed_factor * 6
     # value = min(max(value, -max_value), max_value)
     if(value < 0):
-        speed = value/0.229 - 4294967296
+        speed = 4294967296 + value/0.229
     else:
         speed = value/0.229
-    print('sending this speed:',speed)
-    return int(speed)
+    # print('sending this speed:',speed)
+    return int(np.round(speed))
 
 # MARK: - Torque
 
@@ -201,6 +220,12 @@ def dxl_to_load_velocity_position(value,model):
     return(load,velocity,position)
 # MARK: - Baudrate
 
+def dxl_to_load_velocity_multi_position(value,model):
+    load = dxl_to_load(value%65536,model)
+    velocity = dxl_to_speed(((value>>16)%4294967296),model)
+    position = dxl_to_multi_degree(((value>>48)%4294967296),model)
+    return(load,velocity,position)
+
 
 dynamixelBaudrates = {
     1: 1000000.0,
@@ -245,6 +270,12 @@ def dxl_to_rdt(value, model):
 
 def rdt_to_dxl(value, model):
     return int(value / 2)
+
+def ms_to_dxl(value,model):
+    return int(value/20)
+
+def dxl_to_ms(value,model):
+    return value*20
 
 # MARK: - Temperature
 
@@ -414,3 +445,4 @@ def dxl_code_all(value, length, nb_elem):
         return list(itertools.chain(*(dxl_code(v, length) for v in value)))
     else:
         return dxl_code(value, length)
+
