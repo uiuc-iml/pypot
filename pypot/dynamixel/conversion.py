@@ -78,7 +78,7 @@ def degree_to_dxl(value, model):
     return pos
 
 def dxl_to_multi_degree(value,model):
-    print('receiving this pos value = {}'.format(value))
+    # print('receiving this pos value = {}'.format(value))
 
     if(value > 4294967296/2):
         value = (value - 4294967296)
@@ -92,7 +92,7 @@ def multi_degree_to_dxl(value,model):
         pos = 4294967296 + value/0.088
     else:
         pos = value/0.088
-    print('sending this pos: {} , which is read as {}'.format(pos,dxl_to_multi_degree(pos,None)))
+    # print('sending this pos: {} , which is read as {}'.format(pos,dxl_to_multi_degree(pos,None)))
 
     return int(numpy.round((numpy.clip(pos,0,4294967296))))
 
@@ -127,7 +127,7 @@ def speed_to_dxl(value, model):
     else:
         speed = value/0.229
     # print('sending this speed:',speed)
-    return int(np.round(speed))
+    return int(numpy.round(speed))
 
 # MARK: - Torque
 
