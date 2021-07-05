@@ -106,7 +106,7 @@ class AbstractDxlIO(object):
         # Warning: If no motor is connected on the bus, this will run forever!!!
         import platform
         # import time
-        import pypot.utils.pypot_time as time
+        import pypot.dynamixel.utils.pypot_time as time
 
         for i in range(max_recursion):
             self._known_models.clear()
