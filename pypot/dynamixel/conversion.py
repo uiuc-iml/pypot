@@ -16,6 +16,9 @@ import numpy
 import itertools
 import time
 from enum import Enum
+import logging
+
+logger = logging.getLogger(__name__)
 
 # MARK: - Position
 
@@ -381,7 +384,7 @@ def dxl_to_control_mode(value, _):
 
 
 def control_mode_to_dxl(mode, _):
-    print('converting mode')
+    logger.debug('converting mode')
     return (next((v for v, m in control_modes.items()
                   if m == mode), None))
 
