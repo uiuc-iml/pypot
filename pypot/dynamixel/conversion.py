@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 position_range = {
     'MX': (4096, 360.0),
     'SR': (4096, 360.0),
+    'EX': (4096, 251.0),
     '*': (1024, 300.0)
 }
 
@@ -40,6 +41,7 @@ torque_max = {  # in N.m
     'RX-64': 4.,
     'XL-320': 0.39,
     'SR-RH4D': 0.57,
+    'EX-106': 10.9
 }
 
 velocity = {  # in degree/s
@@ -52,7 +54,7 @@ velocity = {  # in degree/s
     'RX-24': 756.,
     'RX-28': 402.,
     'RX-64': 294.,
-    'SR-RH4D': 300.,
+    'SR-RH4D': 300.   
 }
 
 
@@ -62,6 +64,8 @@ def dxl_to_degree(value, model):
         determined_model = 'MX'
     elif model.startswith('SR'):
         determined_model = 'SR'
+    elif model.startswith('EX'):
+        determined_model = 'EX'
     max_pos, max_deg = position_range[determined_model]
 
     return round(((max_deg * float(value)) / (max_pos - 1)) - (max_deg / 2), 2)
@@ -73,6 +77,8 @@ def degree_to_dxl(value, model):
         determined_model = 'MX'   
     elif model.startswith('SR'):
         determined_model = 'SR'
+    elif model.startswith('EX'):
+        determined_model = 'EX'
     max_pos, max_deg = position_range[determined_model]
 
     pos = int(round((max_pos - 1) * ((max_deg / 2 + float(value)) / max_deg), 0))
@@ -190,6 +196,7 @@ dynamixelModels = {
     29: 'MX-28',    # 29 + (0<<8)
     30: 'MX-28',    # 30 + (0<<8)
     64: 'RX-64',    # 64 + (0<<8)
+    107: 'EX-106',
     360: 'MX-12',   # 104 + (1<<8)
     310: 'MX-64',   # 54 + (1<<8)
     320: 'MX-106',  # 64 + (1<<8)
