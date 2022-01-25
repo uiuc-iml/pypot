@@ -22,6 +22,7 @@ from enum import Enum
 position_range = {
     'MX': (4096, 360.0),
     'SR': (4096, 360.0),
+    'XM':(4096,360.0),
     '*': (1024, 300.0)
 }
 
@@ -37,6 +38,7 @@ torque_max = {  # in N.m
     'RX-64': 4.,
     'XL-320': 0.39,
     'SR-RH4D': 0.57,
+    'XM-430':4.1
 }
 
 velocity = {  # in degree/s
@@ -50,6 +52,8 @@ velocity = {  # in degree/s
     'RX-28': 402.,
     'RX-64': 294.,
     'SR-RH4D': 300.,
+    'XM-430':276.,
+
 }
 
 
@@ -59,6 +63,8 @@ def dxl_to_degree(value, model):
         determined_model = 'MX'
     elif model.startswith('SR'):
         determined_model = 'SR'
+    elif model.startswith('XM'):
+        determined_model = 'XM'
     max_pos, max_deg = position_range[determined_model]
 
     return round(((max_deg * float(value)) / (max_pos - 1)) - (max_deg / 2), 2)
@@ -70,6 +76,8 @@ def degree_to_dxl(value, model):
         determined_model = 'MX'
     elif model.startswith('SR'):
         determined_model = 'SR'
+    elif model.startswith('XM'):
+        determined_model = 'XM'
     max_pos, max_deg = position_range[determined_model]
 
     pos = int(round((max_pos - 1) * ((max_deg / 2 + float(value)) / max_deg), 0))
@@ -87,6 +95,8 @@ def dxl_to_speed(value, model):
     speed_factor = 0.111
     if model.startswith('MX') or model.startswith('SR'):
         speed_factor = 0.114
+    elif model.startswith('XM'):
+        speed_factor = 0.229
 
     return direction * (speed * speed_factor) * 6
 
@@ -96,6 +106,8 @@ def speed_to_dxl(value, model):
     speed_factor = 0.111
     if model.startswith('MX') or model.startswith('SR'):
         speed_factor = 0.114
+    elif model.startswith('XM'):
+        speed_factor = 0.229
 
     max_value = 1023 * speed_factor * 6
     value = min(max(value, -max_value), max_value)
@@ -119,6 +131,16 @@ def dxl_to_load(value, model):
 
     return dxl_to_torque(load, model) * direction
 
+def dxl_to_ms(value,model):
+    time_factor = 1
+    if model.startswith('XM'):
+        time_factor = 20
+    return time_factor*value
+def ms_to_dxl(value,model):
+    time_factor = 1
+    if model.startswith('XM'):
+        time_factor = 20
+    return value//time_factor
 # MARK - Acceleration
 
 
@@ -163,6 +185,7 @@ dynamixelModels = {
     350: 'XL-320',  # 94 + (1<<8)
     400: 'SR-RH4D',
     401: 'SR-RH4D',  # Virtual motor
+    1020:'XM-430'
 }
 
 
@@ -327,6 +350,7 @@ def led_color_to_dxl(value, model):
 control_modes = {
     1: 'wheel',
     2: 'joint',
+    3: 'xm_position'
 }
 
 
@@ -350,14 +374,14 @@ def bool_to_dxl(value, model):
 
 
 def dxl_decode(data):
-    if len(data) not in (1, 2):
+    if len(data) == 0:
         raise ValueError('try to decode incorrect data {}'.format(data))
 
     if len(data) == 1:
         return data[0]
-
-    if len(data) == 2:
+    elif len(data) == 2:
         return data[0] + (data[1] << 8)
+    elif len(data) == 
 
 
 def dxl_decode_all(data, nb_elem):
