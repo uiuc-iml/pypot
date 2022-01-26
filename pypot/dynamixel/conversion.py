@@ -114,29 +114,33 @@ def dxl_to_speed(value, model):
     # cw, speed = divmod(value, 1024)
     # direction = (-2 * cw + 1)
 
-    # speed_factor = 0.111
-    # if model.startswith('MX') or model.startswith('SR'):
-    #     speed_factor = 0.114
+    speed_factor = 0.111
+    if model.startswith('MX') or model.startswith('SR'):
+        speed_factor = 0.114
+    elif(model.startswith('XM')):
+        speed_factor = 0.229
     # print('this is the value I got {}'.format(value))
     if(value > 4294967296/2):
         velocity = (value - 4294967296)
     else:
         velocity = value
-    return velocity*0.229
+    return velocity*speed_factor
 
 
 def speed_to_dxl(value, model):
     # direction = 1024 if value < 0 else 0
-    # speed_factor = 0.111
-    # if model.startswith('MX') or model.startswith('SR'):
-    #     speed_factor = 0.114
+    speed_factor = 0.111
+    if model.startswith('MX') or model.startswith('SR'):
+        speed_factor = 0.114
+    elif(model.startswith('XM')):
+        speed_factor = 0.229
 
     # max_value = 1023 * speed_factor * 6
     # value = min(max(value, -max_value), max_value)
     if(value < 0):
-        speed = 4294967296 + value/0.229
+        speed = 4294967296 + value/speed_factor
     else:
-        speed = value/0.229
+        speed = value/speed_factor
     # print('sending this speed:',speed)
     return int(numpy.round(speed))
 
@@ -144,7 +148,11 @@ def speed_to_dxl(value, model):
 
 
 def dxl_to_torque(value, model):
-    return round(value / 10, 1)
+
+    if(model.startswith('XM')):
+        return round(value*0.00269*1.66,1)
+    else:
+        return round(value / 10, 1)
 
 
 def torque_to_dxl(value, model):
@@ -153,6 +161,7 @@ def torque_to_dxl(value, model):
 
 def dxl_to_load(value, model):
     # print('processing this value {}'.format(value))
+        
     if(value > 1000):
         load = value - 65536
     else:
