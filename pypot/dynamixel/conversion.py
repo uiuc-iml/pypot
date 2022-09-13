@@ -26,6 +26,7 @@ position_range = {
     'MX': (4096, 360.0),
     'SR': (4096, 360.0),
     'EX': (4096, 251.0),
+    'XM':(4096,360.0),
     '*': (1024, 300.0)
 }
 
@@ -41,7 +42,8 @@ torque_max = {  # in N.m
     'RX-64': 4.,
     'XL-320': 0.39,
     'SR-RH4D': 0.57,
-    'EX-106': 10.9
+    'EX-106': 10.9,
+    'XM-430':4.1
 }
 
 velocity = {  # in degree/s
@@ -54,7 +56,8 @@ velocity = {  # in degree/s
     'RX-24': 756.,
     'RX-28': 402.,
     'RX-64': 294.,
-    'SR-RH4D': 300.   
+    'SR-RH4D': 300.,
+    'XM-430':276.
 }
 
 
@@ -66,6 +69,8 @@ def dxl_to_degree(value, model):
         determined_model = 'SR'
     elif model.startswith('EX'):
         determined_model = 'EX'
+    elif model.startswith('XM'):
+        determined_model = 'XM'
     max_pos, max_deg = position_range[determined_model]
 
     return round(((max_deg * float(value)) / (max_pos - 1)) - (max_deg / 2), 2)
@@ -79,6 +84,8 @@ def degree_to_dxl(value, model):
         determined_model = 'SR'
     elif model.startswith('EX'):
         determined_model = 'EX'
+    elif model.startswith('XM'):
+        determined_model = 'XM'
     max_pos, max_deg = position_range[determined_model]
 
     pos = int(round((max_pos - 1) * ((max_deg / 2 + float(value)) / max_deg), 0))
@@ -112,29 +119,33 @@ def dxl_to_speed(value, model):
     # cw, speed = divmod(value, 1024)
     # direction = (-2 * cw + 1)
 
-    # speed_factor = 0.111
-    # if model.startswith('MX') or model.startswith('SR'):
-    #     speed_factor = 0.114
+    speed_factor = 0.111
+    if model.startswith('MX') or model.startswith('SR'):
+        speed_factor = 0.114
+    elif(model.startswith('XM')):
+        speed_factor = 0.229
     # print('this is the value I got {}'.format(value))
     if(value > 4294967296/2):
         velocity = (value - 4294967296)
     else:
         velocity = value
-    return velocity*0.229
+    return velocity*speed_factor
 
 
 def speed_to_dxl(value, model):
     # direction = 1024 if value < 0 else 0
-    # speed_factor = 0.111
-    # if model.startswith('MX') or model.startswith('SR'):
-    #     speed_factor = 0.114
+    speed_factor = 0.111
+    if model.startswith('MX') or model.startswith('SR'):
+        speed_factor = 0.114
+    elif(model.startswith('XM')):
+        speed_factor = 0.229
 
     # max_value = 1023 * speed_factor * 6
     # value = min(max(value, -max_value), max_value)
     if(value < 0):
-        speed = 4294967296 + value/0.229
+        speed = 4294967296 + value/speed_factor
     else:
-        speed = value/0.229
+        speed = value/speed_factor
     # print('sending this speed:',speed)
     return int(numpy.round(speed))
 
@@ -142,7 +153,11 @@ def speed_to_dxl(value, model):
 
 
 def dxl_to_torque(value, model):
-    return round(value / 10, 1)
+
+    if(model.startswith('XM')):
+        return round(value*0.00269*1.66,1)
+    else:
+        return round(value / 10, 1)
 
 
 def torque_to_dxl(value, model):
@@ -157,6 +172,16 @@ def dxl_to_load(value, model):
         load = value
     return dxl_to_torque(load, model)
 
+def dxl_to_ms(value,model):
+    time_factor = 1
+    if model.startswith('XM'):
+        time_factor = 20
+    return time_factor*value
+def ms_to_dxl(value,model):
+    time_factor = 1
+    if model.startswith('XM'):
+        time_factor = 20
+    return value//time_factor
 # MARK - Acceleration
 
 
@@ -203,6 +228,7 @@ dynamixelModels = {
     350: 'XL-320',  # 94 + (1<<8)
     400: 'SR-RH4D',
     401: 'SR-RH4D',  # Virtual motor
+    1020:'XM-430'
 }
 
 
@@ -455,4 +481,3 @@ def dxl_code_all(value, length, nb_elem):
         return list(itertools.chain(*(dxl_code(v, length) for v in value)))
     else:
         return dxl_code(value, length)
-
