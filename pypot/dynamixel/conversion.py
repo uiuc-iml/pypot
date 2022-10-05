@@ -333,8 +333,27 @@ def dxl_to_current(value, model):
         # The SR motors do use a different conversion formula than the dynamixel motors
         # See http://kb.seedrobotics.com/doku.php?id=dh4d:dynamixelcontroltables
         return (value * 0.4889) / 1000.0
+    elif model.startswith('XM'):
+        # dunno if this generalizes lol
+        conv = 2.69/1000
+        # 2 byte 2s complement.
+        if value >= 0x8000:
+            value -= 0x10000
+        return value*conv
     else:
         return 4.5 * (value - 2048.0) / 1000.0
+
+def current_to_dxl(value, model):
+    if model.startswith('SR'):
+        # The SR motors do use a different conversion formula than the dynamixel motors
+        # See http://kb.seedrobotics.com/doku.php?id=dh4d:dynamixelcontroltables
+        return (value / 0.4889) * 1000.0
+    elif model.startswith('XM'):
+        # dunno if this generalizes lol
+        conv = 2.69/1000
+        return int(value / conv)
+    else:
+        raise ValueError("Unknown/bad current setter impl")
 
 # MARK: - Voltage
 
@@ -408,6 +427,7 @@ def led_color_to_dxl(value, model):
 
 
 control_modes = {
+    0: 'current',
     1: 'velocity',
     3: 'position',
     4: 'extended_position'
@@ -474,7 +494,7 @@ def dxl_code(value, length):
     result = length*[0]
     # print(value)
     for i in range(length):
-        result[i]  = ((value >> (8*i))%256)
+        result[i]  = ((value >> (8*i)) & 0xff)
     # print('decoding took {}'.format(time.time()-start_time))
     return tuple(result)
 
