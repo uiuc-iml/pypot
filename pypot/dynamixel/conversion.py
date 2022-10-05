@@ -62,6 +62,8 @@ velocity = {  # in degree/s
 
 
 def dxl_to_degree(value, model):
+    if value >= 0x80000000:
+        value -= 0x100000000
     determined_model = '*'
     if model.startswith('MX'):
         determined_model = 'MX'
@@ -96,10 +98,8 @@ def degree_to_dxl(value, model):
 def dxl_to_multi_degree(value,model):
     # print('receiving this pos value = {}'.format(value))
 
-    if(value > 4294967296/2):
-        value = (value - 4294967296)
-    else:
-        value = value
+    if value >= 0x80000000:
+        value -= 0x100000000
     return 0.088*value
 
 def multi_degree_to_dxl(value,model):
@@ -116,6 +116,8 @@ def multi_degree_to_dxl(value,model):
 
 
 def dxl_to_speed(value, model):
+    if value >= 0x80000000:
+        value -= 0x100000000
     # cw, speed = divmod(value, 1024)
     # direction = (-2 * cw + 1)
 
@@ -166,8 +168,8 @@ def torque_to_dxl(value, model):
 
 def dxl_to_load(value, model):
     # print('processing this value {}'.format(value))
-    if(value > 1000):
-        load = value - 65536
+    if value >= 0x8000:
+        load = value - 0x10000
     else:
         load = value
     return dxl_to_torque(load, model)
@@ -250,16 +252,16 @@ def drive_mode_to_dxl(value, model):
     return (int('slave' in value) << 1 | int('reverse' in value))
 
 def dxl_to_load_velocity_position(value,model):
-    load = dxl_to_load(value%65536,model)
-    velocity = dxl_to_speed(((value>>16)%4294967296),model)
-    position = dxl_to_degree(((value>>48)%4294967296),model)
+    load = dxl_to_load(value & 0xffff,model)
+    velocity = dxl_to_speed(((value>>16) & 0xffffffff),model)
+    position = dxl_to_degree(((value>>48) & 0xffffffff),model)
     return(load,velocity,position)
 # MARK: - Baudrate
 
 def dxl_to_load_velocity_multi_position(value,model):
-    load = dxl_to_load(value%65536,model)
-    velocity = dxl_to_speed(((value>>16)%4294967296),model)
-    position = dxl_to_multi_degree(((value>>48)%4294967296),model)
+    load = dxl_to_load(value & 0xffff,model)
+    velocity = dxl_to_speed(((value>>16) & 0xffffffff),model)
+    position = dxl_to_multi_degree(((value>>48) & 0xffffffff),model)
     return(load,velocity,position)
 
 
