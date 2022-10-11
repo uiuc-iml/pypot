@@ -75,7 +75,7 @@ def dxl_to_degree(value, model):
         determined_model = 'XM'
     max_pos, max_deg = position_range[determined_model]
 
-    return round(((max_deg * float(value)) / (max_pos - 1)) - (max_deg / 2), 2)
+    return value * max_deg / max_pos
 
 
 def degree_to_dxl(value, model):
@@ -90,8 +90,8 @@ def degree_to_dxl(value, model):
         determined_model = 'XM'
     max_pos, max_deg = position_range[determined_model]
 
-    pos = int(round((max_pos - 1) * ((max_deg / 2 + float(value)) / max_deg), 0))
-    pos = min(max(pos, 0), max_pos - 1)
+    pos = int(round((float(value) * max_pos / max_deg), 0))
+    pos = min(max(pos, 0), max_pos - 1) # TODO: this is janky (what about extended position mode?)
 
     return pos
 
@@ -103,18 +103,25 @@ def dxl_to_multi_degree(value,model):
     return 0.088*value
 
 def multi_degree_to_dxl(value,model):
+    determined_model = '*'
+    if model.startswith('MX'):
+        determined_model = 'MX'   
+    elif model.startswith('SR'):
+        determined_model = 'SR'
+    elif model.startswith('EX'):
+        determined_model = 'EX'
+    elif model.startswith('XM'):
+        determined_model = 'XM'
+    max_pos, max_deg = position_range[determined_model]
+    conv_factor = max_pos / max_deg
 
     if(value < 0):
-        pos = 4294967296 + value/0.088
+        pos = 4294967296 + value * conv_factor
     else:
-        pos = value/0.088
-    # print('sending this pos: {} , which is read as {}'.format(pos,dxl_to_multi_degree(pos,None)))
-
+        pos = value * conv_factor
     return int(numpy.round((numpy.clip(pos,0,4294967296))))
 
 # MARK: - Speed
-
-
 def dxl_to_speed(value, model):
     if value >= 0x80000000:
         value -= 0x100000000
