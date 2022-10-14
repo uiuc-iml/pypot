@@ -18,6 +18,8 @@ import time
 from enum import Enum
 import logging
 
+from prometheus_client import start_wsgi_server
+
 logger = logging.getLogger(__name__)
 
 # MARK: - Position
@@ -209,15 +211,35 @@ def acceleration_to_dxl(value, model):
 
 
 def dxl_to_pid(value, model):
-    return (value[0] * 0.004,
+    if(model.startswith('XM')):
+        return (value[0],value[1],value[2])
+    else:
+        return (value[0] * 0.004,
             value[1] * 0.48828125,
             value[2] * 0.125)
 
 
 def pid_to_dxl(value, model):
-    def truncate(x):
-        return int(max(0, min(x, 254)))
-    return [truncate(x * y) for x, y in zip(value, (250, 2.048, 8.0))]
+    if(model.startswith('XM')):
+        return (value[0],value[1],value[2])
+    else:
+        def truncate(x):
+            return int(max(0, min(x, 254)))
+        return [truncate(x * y) for x, y in zip(value, (250, 2.048, 8.0))]
+
+def dxl_to_pi(value, model):
+    if(model.startswith('XM')):
+        return (value[0],value[1])
+    else:
+        return (value[0] * 0.004,
+            value[1] * 0.48828125)
+
+def pi_to_dxl(value, model):
+    if(model.startswith('XM')):
+        return (value[0],value[1])
+    else:
+        return (value[0] * 0.004,
+            value[1] * 0.48828125)
 
 # MARK: - Model
 
