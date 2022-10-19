@@ -212,7 +212,7 @@ def acceleration_to_dxl(value, model):
 
 def dxl_to_pid(value, model):
     if(model.startswith('XM')):
-        return (value[0],value[1],value[2])
+        return (value[2],value[1],value[0])
     else:
         return (value[0] * 0.004,
             value[1] * 0.48828125,
@@ -221,7 +221,7 @@ def dxl_to_pid(value, model):
 
 def pid_to_dxl(value, model):
     if(model.startswith('XM')):
-        return (value[0],value[1],value[2])
+        return (value[2],value[1],value[0])
     else:
         def truncate(x):
             return int(max(0, min(x, 254)))
@@ -229,14 +229,14 @@ def pid_to_dxl(value, model):
 
 def dxl_to_pi(value, model):
     if(model.startswith('XM')):
-        return (value[0],value[1])
+        return (value[1],value[0])
     else:
         return (value[0] * 0.004,
             value[1] * 0.48828125)
 
 def pi_to_dxl(value, model):
     if(model.startswith('XM')):
-        return (value[0],value[1])
+        return (value[1],value[0])
     else:
         return (value[0] * 0.004,
             value[1] * 0.48828125)
