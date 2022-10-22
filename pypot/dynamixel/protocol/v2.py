@@ -15,6 +15,7 @@ class DxlInstruction(object):
     READ_DATA = 0x02
     WRITE_DATA = 0x03
     RESET = 0x06
+    REBOOT = 0x08
     SYNC_READ = 0x82
     SYNC_WRITE = 0x83
 
@@ -90,6 +91,13 @@ class DxlResetPacket(DxlInstructionPacket):
     def __new__(cls, id, mode):
         return DxlInstructionPacket.__new__(cls, id,
                                             DxlInstruction.RESET, (mode, ))
+
+
+class DxlRebootPacket(DxlInstructionPacket):
+    """ This class is used to represent factory reset packet. """
+    def __new__(cls, id):
+        return DxlInstructionPacket.__new__(cls, id,
+                                            DxlInstruction.REBOOT, ())
 
 
 class DxlReadDataPacket(DxlInstructionPacket):

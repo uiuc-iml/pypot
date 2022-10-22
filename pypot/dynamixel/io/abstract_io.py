@@ -215,6 +215,18 @@ class AbstractDxlIO(object):
         except DxlTimeoutError:
             return False
 
+    def reboot(self, ids):
+        retval = True
+        for id in ids:
+            packet = self._protocol.DxlRebootPacket(id)
+            try:
+                self._send_packet(packet)
+            except DxlTimeoutError:
+                retval = False
+                print("pypot: Failed to reboot dynamixel motor with id", id)
+                continue
+        return retval
+
     def scan(self, ids=range(254)):
         """ Pings all ids within the specified list, by default it finds all the motors connected to the bus. """
         return [id for id in ids if self.ping(id)]
